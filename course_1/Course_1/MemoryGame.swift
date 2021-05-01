@@ -11,8 +11,18 @@ struct MemoryGame<CardContent> {
     typealias content = (Int) -> CardContent
     var cards: [Card]
     
-    func choose (card: Card) {
+    mutating func choose (card: Card) {
         print("Card is chosen: \(card)")
+         self.cards[index(of: card)].isFaceUp = !self.cards[index(of: card)].isFaceUp
+    }
+    
+    func index (of card: Card) -> Int {
+        for i in 0..<self.cards.count {
+            if self.cards[i].id == card.id {
+                return i
+            }
+        }
+        return 0
     }
     
     init (numberOfPairsOfCards: Int, cardContentFactory: content) {
@@ -29,6 +39,5 @@ struct MemoryGame<CardContent> {
         var isFaceUp: Bool
         var isMatched: Bool
         var content: CardContent
-        
     }
 }
