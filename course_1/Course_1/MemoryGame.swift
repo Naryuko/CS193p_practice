@@ -7,30 +7,44 @@
 
 import Foundation
 
-struct MemoryGame<CardContent> {
+struct MemoryGame<CardContent> where CardContent: Equatable {
     typealias content = (Int) -> CardContent
     var cards: [Card]
     
-    mutating func choose (card: Card) {
-        print("Card is chosen: \(card)")
-         self.cards[index(of: card)].isFaceUp = !self.cards[index(of: card)].isFaceUp
-    }
-    
-    func index (of card: Card) -> Int {
-        for i in 0..<self.cards.count {
-            if self.cards[i].id == card.id {
-                return i
+    var indexOfTheOneAndOnlyFaceUpCard: Int? {
+        get {
+            cards.indices.filter { cards[$0].isFaceUp }.only
+        }
+        
+        set {
+            for index in cards.indices {
+                cards[index].isFaceUp = index == newValue
             }
         }
-        return 0
+    }
+    
+    mutating func choose (card: Card) {
+        if let index = self.cards.firstIndex(matching: card), !cards[index].isFaceUp, !cards[index].isMatched {
+            if let potentialMatchIndex = indexOfTheOneAndOnlyFaceUpCard {
+                if cards[index].content == cards[potentialMatchIndex].content {
+                    cards[index].isMatched = true
+                    cards[potentialMatchIndex].isMatched = true
+                }
+            } else {
+                for index in cards.indices {
+                    cards[index].isFaceUp = false
+                }
+            }
+            self.cards[index].isFaceUp = !self.cards[index].isFaceUp
+        }
     }
     
     init (numberOfPairsOfCards: Int, cardContentFactory: content) {
         cards = []
         
         for i in 0..<numberOfPairsOfCards {
-            cards.append(Card(id: 2*i, isFaceUp: true, isMatched: false, content: cardContentFactory(i)))
-            cards.append(Card(id: 2*i+1, isFaceUp: true, isMatched: false, content: cardContentFactory(i)))
+            cards.append(Card(id: 2*i, isFaceUp: false, isMatched: false, content: cardContentFactory(i)))
+            cards.append(Card(id: 2*i+1, isFaceUp: false, isMatched: false, content: cardContentFactory(i)))
         }
     }
     

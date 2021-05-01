@@ -11,13 +11,13 @@ struct EmojiMemoryGameView: View {
     // ObservedObject는 해당 property가 ObservedObject를 상속한 것을 알려줌
     @ObservedObject var viewModel: EmojiMemoryGame
     var body: some View {
-        HStack {
-            ForEach(viewModel.cards) { card in
-                CardView(card: card).onTapGesture {
-                    self.viewModel.choose(card: card)
-                }
+        Grid(items: viewModel.cards) {card in
+            CardView(card: card).onTapGesture {
+                self.viewModel.choose(card: card)
+            
             }
-        }.padding()
+            .padding()
+        }
     }
 }
 
@@ -43,7 +43,9 @@ struct CardView: View {
                 RoundedRectangle(cornerRadius: cornerRadius).stroke()
                 Text(card.content).font(Font.system(size: fontSize(for: size)))
             } else {
-                RoundedRectangle(cornerRadius: cornerRadius).fill()
+                if !card.isMatched {
+                    RoundedRectangle(cornerRadius: cornerRadius).fill()
+                }
             }
         }.foregroundColor(.orange)
     }
