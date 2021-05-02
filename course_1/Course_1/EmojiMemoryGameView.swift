@@ -21,12 +21,6 @@ struct EmojiMemoryGameView: View {
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        EmojiMemoryGameView(viewModel: EmojiMemoryGame())
-    }
-}
-
 struct CardView: View {
     var card: MemoryGame<String>.Card
     
@@ -37,24 +31,30 @@ struct CardView: View {
     }
     
     func body (for size: CGSize) -> some View {
-        return ZStack {
-            if card.isFaceUp {
-                RoundedRectangle(cornerRadius: cornerRadius).fill().foregroundColor(.white)
-                RoundedRectangle(cornerRadius: cornerRadius).stroke()
-                Text(card.content).font(Font.system(size: fontSize(for: size)))
-            } else {
-                if !card.isMatched {
-                    RoundedRectangle(cornerRadius: cornerRadius).fill()
+        return Group {
+            if card.isFaceUp || !card.isMatched {
+                ZStack {
+                    Pie(startAngle: Angle.degrees(-90), endAngle: Angle.degrees(20), clockwise: true).padding(5).opacity(0.4)
+                    Text(card.content).font(Font.system(size: fontSize(for: size)))
                 }
+                .cardify(isFaceUp: card.isFaceUp)
             }
-        }.foregroundColor(.orange)
+        }
     }
     
     // MARK: -Drawing Constants
     
-    let cornerRadius: CGFloat = 10
-    let fontScaleFactor: CGFloat = 0.75
-    func fontSize (for size: CGSize) -> CGFloat {
+    private let fontScaleFactor: CGFloat = 0.65
+    private func fontSize (for size: CGSize) -> CGFloat {
         return min(size.width, size.height)*fontScaleFactor
+    }
+}
+
+
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        let game = EmojiMemoryGame()
+        game.choose(card: game.cards[3])
+        return EmojiMemoryGameView(viewModel: game)
     }
 }
